@@ -20,7 +20,9 @@ export class GlobalDurableObject extends DurableObject {
     if (!upgradeHeader || upgradeHeader !== "websocket") {
       return new Response("Expected Upgrade: websocket", { status: 426 });
     }
-    const [client, server] = new WebSocketPair();
+    const pair = new WebSocketPair();
+    const client = pair[0];
+    const server = pair[1];
     await this.setupWebSocket(server);
     return new Response(null, { status: 101, webSocket: client });
   }

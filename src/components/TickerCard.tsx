@@ -14,12 +14,16 @@ export function TickerCard({ name, price, color, logo, isOracle }: TickerCardPro
   const [trend, setTrend] = useState<'up' | 'down' | 'neutral'>('neutral');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    if (price && prevPrice) {
-      if (price > prevPrice) setTrend('up');
-      else if (price < prevPrice) setTrend('down');
-      setPrevPrice(price);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setTrend('neutral'), 800);
+    if (price !== undefined) {
+      setPrevPrice(prev => {
+        if (prev !== undefined && price !== prev) {
+          if (price > prev) setTrend('up');
+          else if (price < prev) setTrend('down');
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          timeoutRef.current = setTimeout(() => setTrend('neutral'), 800);
+        }
+        return price;
+      });
     }
   }, [price]);
   const colorMap = {
