@@ -1,6 +1,6 @@
 # Flux Ticker
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/rziman/flux-ticker-realtime-multi-source-crypto-stream)
 
 A full-stack application powered by Cloudflare Workers, featuring a modern React frontend with Tailwind CSS and shadcn/ui, a Hono-based API backend with Durable Objects for persistent state management (like counters and demo items), and seamless deployment to Cloudflare's global edge network.
 
@@ -96,7 +96,7 @@ Or manually:
 
 Configuration is in `wrangler.jsonc`. Assets are served as SPA, API routes (`/api/*`) handled by Worker first. Durable Objects auto-migrate.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/rziman/flux-ticker-realtime-multi-source-crypto-stream)
 
 ## API Usage Examples
 
