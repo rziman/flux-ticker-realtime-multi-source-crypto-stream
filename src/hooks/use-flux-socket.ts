@@ -1,35 +1,55 @@
-import { useState, useEffect } from 'react';
-import type { MarketState } from '@shared/types';
+import { useState, useEffect, useRef } from 'react';
+import type { MarketState, WSMessage } from '@shared/types';
 export function useFluxSocket() {
   const [latest, setLatest] = useState<MarketState | null>(null);
   const [history, setHistory] = useState<MarketState[]>([]);
   const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
-  
+  const wsRef = useRef<WebSocket | null>(null);
   useEffect(() => {
-    console.log('Starting Flux Ticker polling...');
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch('/api/market');
-        if (res.ok) {
-          const data = await res.json();
-          setLatest(data.latest);
-          setHistory(data.history);
-          setStatus('connected');
-          console.log('Flux Ticker poll success');
-        } else {
-          console.error('Poll failed');
-          setStatus('disconnected');
+    let reconnectTimeout: NodeJS.Timeout;
+    const connect = () => {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      const wsUrl = `${protocol}//${host}/api/ws`;
+      console.log('Connecting to Flux Ticker...', wsUrl);
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+      ws.onopen = () => {
+        setStatus('connected');
+        console.log('Flux Ticker connected');
+      };
+      ws.onmessage = (event) => {
+        try {
+          const msg: WSMessage = JSON.parse(event.data);
+          if (msg.type === 'snapshot') {
+            setLatest(msg.latest);
+            setHistory(msg.data);
+          } else if (msg.type === 'update') {
+            setLatest(msg.data);
+            setHistory(prev => {
+              const next = [...prev, msg.data];
+              return next.length > 100 ? next.slice(-100) : next;
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse WS message', e);
         }
-      } catch (e) {
-        console.error('Poll failed', e);
+      };
+      ws.onclose = () => {
         setStatus('disconnected');
-      }
-    }, 1000);
-
+        console.log('Flux Ticker disconnected, retrying...');
+        reconnectTimeout = setTimeout(connect, 3000);
+      };
+      ws.onerror = (err) => {
+        console.error('WS Error:', err);
+        ws.close();
+      };
+    };
+    connect();
     return () => {
-      clearInterval(interval);
+      if (wsRef.current) wsRef.current.close();
+      clearTimeout(reconnectTimeout);
     };
   }, []);
-
   return { latest, history, status };
 }
