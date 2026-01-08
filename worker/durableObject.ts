@@ -17,6 +17,7 @@ export class GlobalDurableObject extends DurableObject {
   }
   async fetch(request: Request): Promise<Response> {
     const upgradeHeader = request.headers.get("Upgrade");
+    console.log('DO fetch Upgrade header:', upgradeHeader);
     if (!upgradeHeader || upgradeHeader !== "websocket") {
       return new Response("Expected Upgrade: websocket", { status: 426 });
     }
@@ -81,5 +82,9 @@ export class GlobalDurableObject extends DurableObject {
     await this.ctx.storage.put("counter_value", v);
     return v;
   }
+  async getMarketData(): Promise<{latest: MarketState, history: MarketState[]}> { 
+    return { latest: this.latestState, history: this.history.slice(-100) }; 
+  }
+
   async getDemoItems(): Promise<any[]> { return []; }
 }

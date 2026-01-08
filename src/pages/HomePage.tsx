@@ -41,11 +41,11 @@ export function HomePage() {
               color="orange" 
               logo="https://cryptologos.cc/logos/binance-coin-bnb-logo.png"
             />
-            <TickerCard 
-              name="Coinbase" 
-              price={latest?.coinbase} 
-              color="blue" 
-              logo="https://cryptologos.cc/logos/coinbase-c-logo.png"
+            <TickerCard
+              name="Coinbase"
+              price={latest?.coinbase}
+              color="blue"
+              logo="https://cryptologos.cc/logos/coinbase-logo.png"
             />
             <TickerCard 
               name="Chainlink" 
